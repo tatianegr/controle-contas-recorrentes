@@ -1,747 +1,609 @@
 <!DOCTYPE html>
 <html lang="pt-BR" class="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Controle de Contas Recorrentes</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Controle de Contas Mensais</title>
 
   <script>
-    tailwind.config = { darkMode: 'class' };
+    tailwind.config = { darkMode: 'class' }
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
 
   <link
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     rel="stylesheet"
   />
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-    :root {
-      --bg-main: #030712;
-      --bg-card: rgba(17, 24, 39, 0.82);
-      --border: rgba(255, 255, 255, 0.08);
-      --text-main: #F9FAFB;
-      --text-soft: #9CA3AF;
-      --accent: #8B5CF6;
-      --accent-2: #EC4899;
-      --success: #10B981;
-      --danger: #EF4444;
-      --warning: #F59E0B;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
     body {
       font-family: 'Inter', sans-serif;
       background:
-        radial-gradient(circle at top left, rgba(139, 92, 246, 0.22), transparent 28%),
-        radial-gradient(circle at top right, rgba(236, 72, 153, 0.18), transparent 24%),
-        linear-gradient(180deg, #020617 0%, #030712 100%);
-      color: var(--text-main);
+        radial-gradient(circle at top, rgba(37, 99, 235, 0.12), transparent 35%),
+        linear-gradient(180deg, #081225 0%, #0b1730 100%);
       min-height: 100vh;
+      color: #f8fafc;
     }
 
-    .glass {
-      background: var(--bg-card);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border: 1px solid var(--border);
-      box-shadow:
-        0 10px 30px rgba(0, 0, 0, 0.25),
-        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    .app-card {
+      background: rgba(30, 41, 59, 0.92);
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.18);
     }
 
-    .gradient-text {
-      background: linear-gradient(90deg, #c084fc 0%, #f472b6 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      color: transparent;
+    .summary-card {
+      background: rgba(30, 41, 59, 0.95);
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.16);
+    }
+
+    .summary-green {
+      border-left: 4px solid #22c55e;
+    }
+
+    .summary-orange {
+      border-left: 4px solid #f97316;
+    }
+
+    .summary-blue {
+      border-left: 4px solid #3b82f6;
+    }
+
+    .section-bar {
+      border-radius: 12px 12px 0 0;
+      font-weight: 700;
     }
 
     .input-dark,
     .select-dark {
-      width: 100%;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      color: #F9FAFB;
-      border-radius: 14px;
-      padding: 0.85rem 1rem;
+      background: #334155;
+      border: 1px solid #475569;
+      color: #f8fafc;
+      border-radius: 10px;
+      padding: 10px 14px;
       outline: none;
-      transition: 0.2s ease;
+      width: 100%;
     }
 
     .input-dark::placeholder {
-      color: #9CA3AF;
+      color: #cbd5e1;
     }
 
     .input-dark:focus,
     .select-dark:focus {
-      border-color: rgba(168, 85, 247, 0.7);
-      box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.14);
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.18);
     }
 
-    .btn-primary {
-      background: linear-gradient(90deg, #7c3aed 0%, #ec4899 100%);
-      color: white;
-      border: none;
-      border-radius: 14px;
-      padding: 0.9rem 1.1rem;
-      font-weight: 700;
-      transition: 0.2s ease;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      filter: brightness(1.05);
-    }
-
-    .btn-secondary {
-      background: rgba(255,255,255,0.06);
-      color: #F9FAFB;
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 14px;
-      padding: 0.9rem 1.1rem;
-      font-weight: 600;
-      transition: 0.2s ease;
-    }
-
-    .btn-secondary:hover {
-      background: rgba(255,255,255,0.1);
-    }
-
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.45rem;
-      padding: 0.38rem 0.7rem;
-      border-radius: 999px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      background: rgba(255, 255, 255, 0.06);
-      color: #E5E7EB;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .mini-card {
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(255,255,255,0.03);
-      border-radius: 18px;
-    }
-
-    .month-card {
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(255,255,255,0.03);
-      border-radius: 20px;
+    .item-row {
+      background: #334155;
+      border: 1px solid #475569;
+      border-radius: 10px;
       overflow: hidden;
     }
 
-    .month-card-header {
-      background: linear-gradient(90deg, rgba(124,58,237,0.18), rgba(236,72,153,0.12));
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+    .btn-green {
+      background: #16a34a;
     }
 
-    .badge-type {
-      font-size: 0.75rem;
-      padding: 0.3rem 0.55rem;
+    .btn-green:hover {
+      background: #15803d;
+    }
+
+    .btn-orange {
+      background: #d97706;
+    }
+
+    .btn-orange:hover {
+      background: #b45309;
+    }
+
+    .btn-red {
+      background: #dc2626;
+    }
+
+    .btn-red:hover {
+      background: #b91c1c;
+    }
+
+    .btn-blue {
+      background: #2563eb;
+    }
+
+    .btn-blue:hover {
+      background: #1d4ed8;
+    }
+
+    .month-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(37, 99, 235, 0.15);
+      color: #bfdbfe;
+      padding: 6px 10px;
       border-radius: 999px;
-      font-weight: 700;
-      white-space: nowrap;
+      font-size: 12px;
+      font-weight: 600;
     }
 
-    .type-mensal { background: rgba(16, 185, 129, 0.12); color: #6EE7B7; }
-    .type-anual { background: rgba(245, 158, 11, 0.12); color: #FCD34D; }
-    .type-parcelado { background: rgba(59, 130, 246, 0.12); color: #93C5FD; }
-    .type-unico { background: rgba(236, 72, 153, 0.12); color: #F9A8D4; }
-
-    .money-positive { color: #A7F3D0; }
-    .money-accent { color: #DDD6FE; }
-
-    .danger-btn {
-      background: rgba(239, 68, 68, 0.12);
-      color: #FCA5A5;
-      border: 1px solid rgba(239, 68, 68, 0.2);
-    }
-
-    .danger-btn:hover {
-      background: rgba(239, 68, 68, 0.18);
-    }
-
-    .table-row + .table-row {
-      border-top: 1px solid rgba(255,255,255,0.06);
-    }
-
-    .empty-state {
-      border: 1px dashed rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.02);
-    }
-
-    ::-webkit-scrollbar {
-      width: 10px;
-      height: 10px;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: rgba(255,255,255,0.12);
-      border-radius: 999px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: transparent;
+    .muted {
+      color: #cbd5e1;
     }
   </style>
 </head>
 <body>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <header class="glass rounded-3xl p-6 md:p-8 mb-8">
-      <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6">
-        <div>
-          <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 text-sm text-gray-300 mb-4">
-            <i class="fa-solid fa-file-invoice-dollar text-violet-300"></i>
-            Controle de contas e compromissos
-          </div>
-
-          <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mb-3">
-            Organize suas contas com um
-            <span class="gradient-text">painel simples e claro</span>
-          </h1>
-
-          <p class="text-gray-300 max-w-3xl leading-relaxed">
-            Cadastre despesas recorrentes ou pontuais, acompanhe os valores mês a mês e veja quanto já está comprometido a partir de abril de 2026.
-          </p>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full xl:max-w-2xl">
-          <div class="mini-card p-4">
-            <p class="text-sm text-gray-400 mb-1">Total cadastrado</p>
-            <p id="totalItems" class="text-2xl font-extrabold">0</p>
-          </div>
-          <div class="mini-card p-4">
-            <p class="text-sm text-gray-400 mb-1">Próximo mês</p>
-            <p id="nextMonthTotal" class="text-2xl font-extrabold money-accent">R$ 0,00</p>
-          </div>
-          <div class="mini-card p-4">
-            <p class="text-sm text-gray-400 mb-1">Maior mês</p>
-            <p id="highestMonthTotal" class="text-2xl font-extrabold money-positive">R$ 0,00</p>
-          </div>
-        </div>
-      </div>
+  <div class="max-w-4xl mx-auto px-4 py-8">
+    <header class="text-center mb-8">
+      <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-2">
+        Controle de Contas Mensais
+      </h1>
+      <p class="text-slate-300 text-base md:text-lg">
+        Escolha o mês/ano e controle água, luz, telefone, parcelas, seguro e anuidades
+      </p>
     </header>
 
-    <section class="grid grid-cols-1 xl:grid-cols-5 gap-8">
-      <div class="xl:col-span-2">
-        <div class="glass rounded-3xl p-6 md:p-7 sticky top-6">
-          <div class="flex items-center gap-3 mb-6">
-            <div class="w-11 h-11 rounded-2xl bg-violet-500/15 flex items-center justify-center text-violet-300 text-lg">
-              <i class="fa-solid fa-plus"></i>
-            </div>
-            <div>
-              <h2 class="text-xl font-bold">Adicionar compromisso</h2>
-              <p class="text-sm text-gray-400">Cadastre água, luz, telefone, parcelas, seguro, anuidades e o que mais precisar.</p>
-            </div>
-          </div>
+    <section class="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
+      <select id="yearSelect" class="select-dark max-w-[140px]"></select>
+      <select id="monthSelect" class="select-dark max-w-[180px]"></select>
+      <button id="historyBtn" class="btn-blue text-white font-semibold px-5 py-3 rounded-xl transition">
+        <i class="fa-solid fa-clock-rotate-left mr-2"></i>Histórico
+      </button>
+    </section>
 
-          <form id="billForm" class="space-y-4">
-            <div>
-              <label class="block text-sm text-gray-300 mb-2">Nome da conta</label>
-              <input
-                id="name"
-                type="text"
-                class="input-dark"
-                placeholder="Ex.: Conta de água, Seguro do carro, Parcela do celular"
-                required
-              />
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm text-gray-300 mb-2">Valor (R$)</label>
-                <input
-                  id="value"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  class="input-dark"
-                  placeholder="0,00"
-                  required
-                />
-              </div>
-
-              <div>
-                <label class="block text-sm text-gray-300 mb-2">Tipo</label>
-                <select id="type" class="select-dark" required>
-                  <option value="mensal">Mensal</option>
-                  <option value="anual">Anual</option>
-                  <option value="parcelado">Parcelado</option>
-                  <option value="unico">Lançamento único</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm text-gray-300 mb-2">Mês de início</label>
-                <select id="startMonth" class="select-dark" required></select>
-              </div>
-
-              <div id="installmentsWrapper" class="hidden">
-                <label class="block text-sm text-gray-300 mb-2">Quantidade de parcelas</label>
-                <input
-                  id="installments"
-                  type="number"
-                  min="1"
-                  step="1"
-                  class="input-dark"
-                  placeholder="Ex.: 12"
-                />
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm text-gray-300 mb-2">Categoria</label>
-                <select id="category" class="select-dark">
-                  <option value="Água">Água</option>
-                  <option value="Luz">Luz</option>
-                  <option value="Telefone">Telefone</option>
-                  <option value="Televisão">Televisão</option>
-                  <option value="Celular">Celular</option>
-                  <option value="Seguro">Seguro</option>
-                  <option value="Anuidade">Anuidade</option>
-                  <option value="Outro">Outro</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block text-sm text-gray-300 mb-2">Observação</label>
-                <input
-                  id="note"
-                  type="text"
-                  class="input-dark"
-                  placeholder="Opcional"
-                />
-              </div>
-            </div>
-
-            <button type="submit" class="btn-primary w-full">
-              <i class="fa-solid fa-floppy-disk mr-2"></i>
-              Adicionar compromisso
-            </button>
-          </form>
-
-          <div class="mt-6 pt-6 border-t border-white/10">
-            <div class="flex flex-wrap gap-2">
-              <span class="pill"><i class="fa-solid fa-repeat text-emerald-300"></i> Mensal</span>
-              <span class="pill"><i class="fa-solid fa-calendar-days text-amber-300"></i> Anual</span>
-              <span class="pill"><i class="fa-solid fa-layer-group text-sky-300"></i> Parcelado</span>
-              <span class="pill"><i class="fa-solid fa-bolt text-pink-300"></i> Único</span>
-            </div>
-          </div>
-        </div>
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div class="summary-card summary-green p-5">
+        <p class="text-slate-400 font-semibold mb-2">Total do Mês</p>
+        <p id="totalMonthCard" class="text-3xl font-extrabold">R$ 0,00</p>
       </div>
 
-      <div class="xl:col-span-3 space-y-8">
-        <div class="glass rounded-3xl p-6 md:p-7">
-          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-            <div>
-              <h2 class="text-xl font-bold">Compromissos cadastrados</h2>
-              <p class="text-sm text-gray-400">Remova qualquer item e a projeção mensal será recalculada automaticamente.</p>
-            </div>
+      <div class="summary-card summary-orange p-5">
+        <p class="text-slate-400 font-semibold mb-2">Total Anual</p>
+        <p id="totalYearCard" class="text-3xl font-extrabold">R$ 0,00</p>
+      </div>
 
-            <button id="clearAllBtn" class="btn-secondary danger-btn">
-              <i class="fa-solid fa-trash-can mr-2"></i>
-              Limpar tudo
-            </button>
+      <div class="summary-card summary-blue p-5">
+        <p class="text-slate-400 font-semibold mb-2">Quantidade de Contas</p>
+        <p id="countCard" class="text-3xl font-extrabold">0</p>
+      </div>
+    </section>
+
+    <section class="app-card p-5 md:p-6 mb-8">
+      <div class="flex items-center justify-between gap-3 mb-4">
+        <h2 class="text-2xl font-bold">Histórico Mensal</h2>
+        <span id="historyMonthLabel" class="month-chip">
+          <i class="fa-solid fa-calendar-days"></i>
+          abril de 2026
+        </span>
+      </div>
+
+      <input
+        id="historyRange"
+        type="range"
+        min="0"
+        value="0"
+        class="w-full accent-slate-400 mb-4"
+      />
+
+      <div class="text-center mt-3">
+        <p id="historyTitle" class="text-xl font-semibold mb-2">abril de 2026</p>
+        <p class="text-green-400 font-semibold">Total do mês: <span id="historyMonthTotal">R$ 0,00</span></p>
+        <p class="text-orange-400 font-semibold">Total anual acumulado: <span id="historyYearTotal">R$ 0,00</span></p>
+        <p class="text-blue-300 font-semibold">Quantidade de contas: <span id="historyCount">0</span></p>
+      </div>
+    </section>
+
+    <section class="mb-8">
+      <div class="section-bar bg-amber-700 px-5 py-4 text-2xl">
+        <i class="fa-solid fa-thumbtack mr-2"></i>
+        Contas e Compromissos
+      </div>
+
+      <div class="app-card rounded-t-none p-5 md:p-6">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-4">
+          <div class="md:col-span-2">
+            <input
+              id="nameInput"
+              class="input-dark"
+              type="text"
+              placeholder="Nome da conta"
+            />
           </div>
 
-          <div id="registeredList" class="space-y-3"></div>
-        </div>
-
-        <div class="glass rounded-3xl p-6 md:p-7">
-          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-            <div>
-              <h2 class="text-xl font-bold">Projeção mensal</h2>
-              <p class="text-sm text-gray-400">Meses exibidos a partir de abril de 2026, com soma automática dos lançamentos.</p>
-            </div>
-
-            <div class="pill">
-              <i class="fa-solid fa-calendar-check text-violet-300"></i>
-              Abril/2026 em diante
-            </div>
+          <div>
+            <input
+              id="valueInput"
+              class="input-dark"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="Valor"
+            />
           </div>
 
-          <div id="monthsGrid" class="grid grid-cols-1 2xl:grid-cols-2 gap-5"></div>
+          <div>
+            <select id="categoryInput" class="select-dark">
+              <option>Água</option>
+              <option>Luz</option>
+              <option>Telefone</option>
+              <option>Televisão</option>
+              <option>Celular</option>
+              <option>Seguro do carro</option>
+              <option>Anuidade</option>
+              <option>Outro</option>
+            </select>
+          </div>
+
+          <div>
+            <select id="recurrenceInput" class="select-dark">
+              <option value="mensal">Mensal</option>
+              <option value="anual">Anual</option>
+              <option value="unico">Somente neste mês</option>
+            </select>
+          </div>
         </div>
+
+        <button id="addBtn" class="btn-orange text-white font-semibold px-5 py-3 rounded-xl transition mb-6">
+          <i class="fa-solid fa-plus mr-2"></i>Adicionar Conta
+        </button>
+
+        <div id="itemsList" class="space-y-3"></div>
+      </div>
+    </section>
+
+    <section class="app-card p-5 md:p-6">
+      <h3 class="text-2xl font-bold mb-4">Resumo do Período</h3>
+
+      <div class="space-y-2 text-base">
+        <p>
+          <span class="font-semibold text-green-400">Total do mês:</span>
+          <span id="resumeMonthTotal">R$ 0,00</span>
+        </p>
+        <p>
+          <span class="font-semibold text-orange-400">Total do ano:</span>
+          <span id="resumeYearTotal">R$ 0,00</span>
+        </p>
+        <p>
+          <span class="font-semibold text-blue-300">Quantidade de contas no mês:</span>
+          <span id="resumeCount">0</span>
+        </p>
+      </div>
+
+      <div class="mt-5">
+        <p class="font-semibold mb-2">Contas lançadas no mês</p>
+        <ul id="resumeList" class="list-disc pl-5 text-slate-100"></ul>
       </div>
     </section>
   </div>
 
   <script>
-    const STORAGE_KEY = "controle_contas_recorrentes_v1";
-    const START_YEAR = 2026;
-    const START_MONTH_INDEX = 3; // abril = 3
-    const TOTAL_MONTHS = 24;
+    const STORAGE_KEY = 'controle-contas-layout-gestao-v1';
 
-    const monthNames = [
-      "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-      "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+    const months = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
     ];
 
-    const form = document.getElementById("billForm");
-    const nameInput = document.getElementById("name");
-    const valueInput = document.getElementById("value");
-    const typeInput = document.getElementById("type");
-    const startMonthInput = document.getElementById("startMonth");
-    const installmentsInput = document.getElementById("installments");
-    const installmentsWrapper = document.getElementById("installmentsWrapper");
-    const categoryInput = document.getElementById("category");
-    const noteInput = document.getElementById("note");
+    const monthSelect = document.getElementById('monthSelect');
+    const yearSelect = document.getElementById('yearSelect');
+    const historyBtn = document.getElementById('historyBtn');
+    const historyRange = document.getElementById('historyRange');
 
-    const registeredList = document.getElementById("registeredList");
-    const monthsGrid = document.getElementById("monthsGrid");
-    const totalItemsEl = document.getElementById("totalItems");
-    const nextMonthTotalEl = document.getElementById("nextMonthTotal");
-    const highestMonthTotalEl = document.getElementById("highestMonthTotal");
-    const clearAllBtn = document.getElementById("clearAllBtn");
+    const nameInput = document.getElementById('nameInput');
+    const valueInput = document.getElementById('valueInput');
+    const categoryInput = document.getElementById('categoryInput');
+    const recurrenceInput = document.getElementById('recurrenceInput');
+    const addBtn = document.getElementById('addBtn');
 
-    let bills = loadBills();
+    const totalMonthCard = document.getElementById('totalMonthCard');
+    const totalYearCard = document.getElementById('totalYearCard');
+    const countCard = document.getElementById('countCard');
 
-    function currency(value) {
-      return value.toLocaleString("pt-BR", {
-        style: "currency",
-        currency: "BRL"
-      });
-    }
+    const itemsList = document.getElementById('itemsList');
 
-    function saveBills() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(bills));
-    }
+    const resumeMonthTotal = document.getElementById('resumeMonthTotal');
+    const resumeYearTotal = document.getElementById('resumeYearTotal');
+    const resumeCount = document.getElementById('resumeCount');
+    const resumeList = document.getElementById('resumeList');
 
-    function loadBills() {
+    const historyMonthLabel = document.getElementById('historyMonthLabel');
+    const historyTitle = document.getElementById('historyTitle');
+    const historyMonthTotal = document.getElementById('historyMonthTotal');
+    const historyYearTotal = document.getElementById('historyYearTotal');
+    const historyCount = document.getElementById('historyCount');
+
+    let data = loadData();
+
+    function loadData() {
       try {
-        const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
-        return Array.isArray(data) ? data : [];
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        return Array.isArray(saved) ? saved : [];
       } catch {
         return [];
       }
     }
 
-    function generateMonthOptions() {
-      const months = [];
-      let year = START_YEAR;
-      let month = START_MONTH_INDEX;
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
 
-      for (let i = 0; i < TOTAL_MONTHS; i++) {
-        months.push({
-          key: `${year}-${String(month + 1).padStart(2, "0")}`,
-          label: `${monthNames[month]}/${year}`,
-          year,
-          month
-        });
+    function formatCurrency(value) {
+      return Number(value).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      });
+    }
 
-        month++;
-        if (month > 11) {
-          month = 0;
-          year++;
-        }
+    function fillSelectors() {
+      yearSelect.innerHTML = '';
+      for (let year = 2026; year <= 2030; year++) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        yearSelect.appendChild(option);
       }
 
-      startMonthInput.innerHTML = months
-        .map((m) => `<option value="${m.key}">${m.label}</option>`)
-        .join("");
+      monthSelect.innerHTML = '';
+      months.forEach((month, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = month;
+        monthSelect.appendChild(option);
+      });
 
-      return months;
+      yearSelect.value = '2026';
+      monthSelect.value = '3';
     }
 
-    const allMonths = generateMonthOptions();
-
-    function getTypeLabel(type) {
-      const labels = {
-        mensal: "Mensal",
-        anual: "Anual",
-        parcelado: "Parcelado",
-        unico: "Único"
-      };
-      return labels[type] || type;
+    function getSelectedYear() {
+      return Number(yearSelect.value);
     }
 
-    function getTypeClass(type) {
-      const classes = {
-        mensal: "type-mensal",
-        anual: "type-anual",
-        parcelado: "type-parcelado",
-        unico: "type-unico"
-      };
-      return classes[type] || "type-unico";
+    function getSelectedMonth() {
+      return Number(monthSelect.value);
     }
 
-    function parseMonthKey(key) {
-      const [year, month] = key.split("-").map(Number);
-      return { year, month: month - 1 };
+    function getMonthLabel(monthIndex, year) {
+      return `${months[monthIndex].toLowerCase()} de ${year}`;
     }
 
-    function monthDiff(a, b) {
-      return (b.year - a.year) * 12 + (b.month - a.month);
-    }
+    function shouldAppearInMonth(item, month, year) {
+      const itemMonth = Number(item.month);
+      const itemYear = Number(item.year);
 
-    function occursInMonth(bill, monthObj) {
-      const start = parseMonthKey(bill.startMonth);
-      const diff = monthDiff(start, monthObj);
-
-      if (diff < 0) return false;
-
-      if (bill.type === "mensal") {
-        return true;
+      if (item.recurrence === 'unico') {
+        return itemMonth === month && itemYear === year;
       }
 
-      if (bill.type === "anual") {
-        return diff % 12 === 0;
+      if (item.recurrence === 'mensal') {
+        const selectedValue = year * 12 + month;
+        const itemValue = itemYear * 12 + itemMonth;
+        return selectedValue >= itemValue;
       }
 
-      if (bill.type === "parcelado") {
-        return diff < bill.installments;
-      }
-
-      if (bill.type === "unico") {
-        return diff === 0;
+      if (item.recurrence === 'anual') {
+        const selectedValue = year * 12 + month;
+        const itemValue = itemYear * 12 + itemMonth;
+        return selectedValue >= itemValue && month === itemMonth;
       }
 
       return false;
     }
 
-    function buildProjection() {
-      return allMonths.map((month) => {
-        const items = bills.filter((bill) => occursInMonth(bill, month));
-        const total = items.reduce((sum, item) => sum + Number(item.value), 0);
-
-        return {
-          ...month,
-          items,
-          total
-        };
-      });
+    function getItemsForMonth(month, year) {
+      return data.filter(item => shouldAppearInMonth(item, month, year));
     }
 
-    function renderRegisteredList() {
-      totalItemsEl.textContent = bills.length;
+    function getTotalForMonth(month, year) {
+      return getItemsForMonth(month, year)
+        .reduce((sum, item) => sum + Number(item.value), 0);
+    }
 
-      if (!bills.length) {
-        registeredList.innerHTML = `
-          <div class="empty-state rounded-2xl p-6 text-center">
-            <div class="w-14 h-14 mx-auto mb-4 rounded-2xl bg-white/5 flex items-center justify-center text-gray-400 text-xl">
-              <i class="fa-solid fa-receipt"></i>
-            </div>
-            <p class="text-gray-200 font-semibold mb-1">Nenhum compromisso cadastrado ainda</p>
-            <p class="text-sm text-gray-400">
-              Adicione sua primeira conta no formulário ao lado para começar.
-            </p>
+    function getCountForMonth(month, year) {
+      return getItemsForMonth(month, year).length;
+    }
+
+    function getTotalForYear(year) {
+      let total = 0;
+      for (let month = 0; month < 12; month++) {
+        total += getTotalForMonth(month, year);
+      }
+      return total;
+    }
+
+    function renderItems() {
+      const selectedMonth = getSelectedMonth();
+      const selectedYear = getSelectedYear();
+      const items = getItemsForMonth(selectedMonth, selectedYear);
+
+      if (!items.length) {
+        itemsList.innerHTML = `
+          <div class="text-slate-300 py-3">
+            Nenhuma conta lançada para este mês.
           </div>
         `;
         return;
       }
 
-      registeredList.innerHTML = bills
-        .map((bill) => `
-          <div class="mini-card p-4 md:p-5">
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-              <div class="min-w-0">
-                <div class="flex flex-wrap items-center gap-2 mb-2">
-                  <h3 class="font-bold text-lg leading-snug">${escapeHtml(bill.name)}</h3>
-                  <span class="badge-type ${getTypeClass(bill.type)}">${getTypeLabel(bill.type)}</span>
-                  <span class="pill">${escapeHtml(bill.category)}</span>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-300">
-                  <p><span class="text-gray-400">Valor:</span> ${currency(Number(bill.value))}</p>
-                  <p><span class="text-gray-400">Início:</span> ${formatMonthLabel(bill.startMonth)}</p>
-                  ${
-                    bill.type === "parcelado"
-                      ? `<p><span class="text-gray-400">Parcelas:</span> ${bill.installments}</p>`
-                      : ""
-                  }
-                  ${
-                    bill.note
-                      ? `<p class="md:col-span-2"><span class="text-gray-400">Obs.:</span> ${escapeHtml(bill.note)}</p>`
-                      : ""
-                  }
-                </div>
-              </div>
-
-              <div class="flex items-center">
-                <button
-                  class="btn-secondary danger-btn w-full lg:w-auto"
-                  onclick="removeBill('${bill.id}')"
-                >
-                  <i class="fa-solid fa-trash mr-2"></i>
-                  Remover
-                </button>
-              </div>
-            </div>
+      itemsList.innerHTML = items.map(item => `
+        <div class="item-row flex items-stretch">
+          <div class="flex-1 px-4 py-3 flex items-center gap-3 min-w-0">
+            <span class="text-slate-100 font-medium truncate">${escapeHtml(item.name)}</span>
+            <span class="text-xs bg-slate-700 text-slate-200 px-2 py-1 rounded-full whitespace-nowrap">${escapeHtml(item.category)}</span>
+            <span class="text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded-full whitespace-nowrap">${labelRecurrence(item.recurrence)}</span>
           </div>
-        `)
-        .join("");
-    }
-
-    function renderMonths() {
-      const projection = buildProjection();
-
-      const highest = projection.reduce((acc, month) => month.total > acc.total ? month : acc, { total: 0 });
-      const firstProjected = projection[0];
-
-      nextMonthTotalEl.textContent = currency(firstProjected?.total || 0);
-      highestMonthTotalEl.textContent = currency(highest?.total || 0);
-
-      monthsGrid.innerHTML = projection
-        .map((month) => `
-          <div class="month-card">
-            <div class="month-card-header p-5">
-              <div class="flex items-center justify-between gap-4">
-                <div>
-                  <h3 class="text-lg font-bold">${month.label}</h3>
-                  <p class="text-sm text-gray-300">${month.items.length} item(ns) lançado(s)</p>
-                </div>
-                <div class="text-right">
-                  <p class="text-xs uppercase tracking-wide text-gray-400 mb-1">Total do mês</p>
-                  <p class="text-xl font-extrabold money-positive">${currency(month.total)}</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="p-4">
-              ${
-                month.items.length
-                  ? `
-                    <div class="rounded-2xl overflow-hidden border border-white/6">
-                      ${month.items.map((item, index) => `
-                        <div class="table-row p-4 flex items-start justify-between gap-4 ${index > 0 ? 'border-t border-white/6' : ''}">
-                          <div class="min-w-0">
-                            <p class="font-semibold leading-snug">${escapeHtml(item.name)}</p>
-                            <div class="flex flex-wrap gap-2 mt-2">
-                              <span class="pill">${escapeHtml(item.category)}</span>
-                              <span class="badge-type ${getTypeClass(item.type)}">${getTypeLabel(item.type)}</span>
-                            </div>
-                            ${
-                              item.note
-                                ? `<p class="text-sm text-gray-400 mt-2">${escapeHtml(item.note)}</p>`
-                                : ""
-                            }
-                          </div>
-                          <div class="text-right shrink-0">
-                            <p class="font-bold">${currency(Number(item.value))}</p>
-                          </div>
-                        </div>
-                      `).join("")}
-                    </div>
-                  `
-                  : `
-                    <div class="empty-state rounded-2xl p-5 text-center">
-                      <p class="text-gray-300 font-medium">Nenhum lançamento neste mês</p>
-                      <p class="text-sm text-gray-500 mt-1">Silêncio financeiro. Milagre raro, mas bonito de ver.</p>
-                    </div>
-                  `
-              }
-            </div>
+          <div class="w-28 px-4 py-3 border-l border-slate-500 flex items-center justify-start">
+            ${formatCurrency(item.value)}
           </div>
-        `)
-        .join("");
+          <button
+            class="btn-red text-white px-4 py-3 transition"
+            onclick="removeItem('${item.id}')"
+            title="Remover"
+          >
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      `).join('');
     }
 
-    function formatMonthLabel(key) {
-      const parsed = parseMonthKey(key);
-      return `${monthNames[parsed.month]}/${parsed.year}`;
-    }
+    function renderSummary() {
+      const selectedMonth = getSelectedMonth();
+      const selectedYear = getSelectedYear();
 
-    function escapeHtml(text) {
-      const div = document.createElement("div");
-      div.textContent = text ?? "";
-      return div.innerHTML;
-    }
+      const monthTotal = getTotalForMonth(selectedMonth, selectedYear);
+      const yearTotal = getTotalForYear(selectedYear);
+      const count = getCountForMonth(selectedMonth, selectedYear);
+      const items = getItemsForMonth(selectedMonth, selectedYear);
 
-    function updateInstallmentsVisibility() {
-      if (typeInput.value === "parcelado") {
-        installmentsWrapper.classList.remove("hidden");
-        installmentsInput.required = true;
+      totalMonthCard.textContent = formatCurrency(monthTotal);
+      totalYearCard.textContent = formatCurrency(yearTotal);
+      countCard.textContent = count;
+
+      resumeMonthTotal.textContent = formatCurrency(monthTotal);
+      resumeYearTotal.textContent = formatCurrency(yearTotal);
+      resumeCount.textContent = count;
+
+      if (!items.length) {
+        resumeList.innerHTML = '<li>—</li>';
       } else {
-        installmentsWrapper.classList.add("hidden");
-        installmentsInput.required = false;
-        installmentsInput.value = "";
+        resumeList.innerHTML = items.map(item => `
+          <li>${escapeHtml(item.name)} (${labelRecurrence(item.recurrence).toLowerCase()})</li>
+        `).join('');
       }
     }
 
-    function removeBill(id) {
-      bills = bills.filter((bill) => bill.id !== id);
-      saveBills();
+    function buildHistoryTimeline() {
+      const timeline = [];
+
+      for (let year = 2026; year <= 2030; year++) {
+        const startMonth = year === 2026 ? 3 : 0;
+
+        for (let month = startMonth; month < 12; month++) {
+          timeline.push({ year, month });
+        }
+      }
+
+      return timeline;
+    }
+
+    const historyTimeline = buildHistoryTimeline();
+    historyRange.max = historyTimeline.length - 1;
+
+    function renderHistory(index) {
+      const point = historyTimeline[index];
+      const monthLabel = getMonthLabel(point.month, point.year);
+      const monthTotal = getTotalForMonth(point.month, point.year);
+      const yearTotal = getTotalForYear(point.year);
+      const count = getCountForMonth(point.month, point.year);
+
+      historyMonthLabel.innerHTML = `<i class="fa-solid fa-calendar-days"></i> ${monthLabel}`;
+      historyTitle.textContent = monthLabel;
+      historyMonthTotal.textContent = formatCurrency(monthTotal);
+      historyYearTotal.textContent = formatCurrency(yearTotal);
+      historyCount.textContent = count;
+    }
+
+    function labelRecurrence(type) {
+      if (type === 'mensal') return 'Mensal';
+      if (type === 'anual') return 'Anual';
+      return 'Somente neste mês';
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text ?? '';
+      return div.innerHTML;
+    }
+
+    function addItem() {
+      const name = nameInput.value.trim();
+      const value = Number(valueInput.value);
+      const category = categoryInput.value;
+      const recurrence = recurrenceInput.value;
+      const month = getSelectedMonth();
+      const year = getSelectedYear();
+
+      if (!name) {
+        alert('Digite o nome da conta.');
+        return;
+      }
+
+      if (!value || value <= 0) {
+        alert('Digite um valor válido.');
+        return;
+      }
+
+      const item = {
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()),
+        name,
+        value,
+        category,
+        recurrence,
+        month,
+        year
+      };
+
+      data.push(item);
+      saveData();
+
+      nameInput.value = '';
+      valueInput.value = '';
+      categoryInput.value = 'Água';
+      recurrenceInput.value = 'mensal';
+
       renderAll();
     }
 
-    function clearAllBills() {
-      const ok = confirm("Tem certeza que deseja apagar todos os compromissos cadastrados?");
-      if (!ok) return;
-
-      bills = [];
-      saveBills();
+    function removeItem(id) {
+      data = data.filter(item => item.id !== id);
+      saveData();
       renderAll();
     }
 
     function renderAll() {
-      renderRegisteredList();
-      renderMonths();
+      renderItems();
+      renderSummary();
+
+      const currentIndex = historyTimeline.findIndex(
+        point => point.month === getSelectedMonth() && point.year === getSelectedYear()
+      );
+
+      if (currentIndex >= 0) {
+        historyRange.value = currentIndex;
+        renderHistory(currentIndex);
+      }
     }
 
-    typeInput.addEventListener("change", updateInstallmentsVisibility);
+    window.removeItem = removeItem;
 
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
+    addBtn.addEventListener('click', addItem);
 
-      const name = nameInput.value.trim();
-      const value = Number(valueInput.value);
-      const type = typeInput.value;
-      const startMonth = startMonthInput.value;
-      const category = categoryInput.value;
-      const note = noteInput.value.trim();
-      const installments = Number(installmentsInput.value);
-
-      if (!name || !value || value <= 0 || !startMonth) {
-        alert("Preencha nome, valor e mês de início corretamente.");
-        return;
+    monthSelect.addEventListener('change', renderAll);
+    yearSelect.addEventListener('change', () => {
+      if (getSelectedYear() === 2026 && getSelectedMonth() < 3) {
+        monthSelect.value = '3';
       }
-
-      if (type === "parcelado" && (!installments || installments < 1)) {
-        alert("Informe a quantidade de parcelas.");
-        return;
-      }
-
-      const newBill = {
-        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()),
-        name,
-        value,
-        type,
-        startMonth,
-        category,
-        note,
-        installments: type === "parcelado" ? installments : null
-      };
-
-      bills.push(newBill);
-      saveBills();
-      form.reset();
-      startMonthInput.value = allMonths[0].key;
-      categoryInput.value = "Água";
-      typeInput.value = "mensal";
-      updateInstallmentsVisibility();
       renderAll();
     });
 
-    clearAllBtn.addEventListener("click", clearAllBills);
+    historyRange.addEventListener('input', (e) => {
+      const index = Number(e.target.value);
+      const point = historyTimeline[index];
 
-    window.removeBill = removeBill;
+      yearSelect.value = point.year;
+      monthSelect.value = point.month;
+      renderAll();
+    });
 
-    startMonthInput.value = allMonths[0].key;
-    updateInstallmentsVisibility();
+    historyBtn.addEventListener('click', () => {
+      const currentIndex = historyTimeline.findIndex(
+        point => point.month === getSelectedMonth() && point.year === getSelectedYear()
+      );
+      renderHistory(currentIndex >= 0 ? currentIndex : 0);
+    });
+
+    fillSelectors();
     renderAll();
   </script>
 </body>
