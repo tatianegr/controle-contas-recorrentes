@@ -84,14 +84,6 @@
       overflow: hidden;
     }
 
-    .btn-green {
-      background: #16a34a;
-    }
-
-    .btn-green:hover {
-      background: #15803d;
-    }
-
     .btn-orange {
       background: #d97706;
     }
@@ -201,14 +193,19 @@
       </div>
 
       <div class="app-card rounded-t-none p-5 md:p-6">
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-4">
-          <div class="md:col-span-2">
-            <input
-              id="nameInput"
-              class="input-dark"
-              type="text"
-              placeholder="Nome da conta"
-            />
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+          <div>
+            <select id="accountInput" class="select-dark">
+              <option value="">Selecione a conta</option>
+              <option>Conta de água</option>
+              <option>Conta de luz</option>
+              <option>Conta de telefone</option>
+              <option>Parcela da televisão</option>
+              <option>Parcela do celular</option>
+              <option>Seguro do carro</option>
+              <option>Anuidade</option>
+              <option>Outro</option>
+            </select>
           </div>
 
           <div>
@@ -220,19 +217,6 @@
               step="0.01"
               placeholder="Valor"
             />
-          </div>
-
-          <div>
-            <select id="categoryInput" class="select-dark">
-              <option>Água</option>
-              <option>Luz</option>
-              <option>Telefone</option>
-              <option>Televisão</option>
-              <option>Celular</option>
-              <option>Seguro do carro</option>
-              <option>Anuidade</option>
-              <option>Outro</option>
-            </select>
           </div>
 
           <div>
@@ -278,7 +262,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = 'controle-contas-layout-gestao-v1';
+    const STORAGE_KEY = 'controle-contas-layout-gestao-v2';
 
     const months = [
       'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -290,9 +274,8 @@
     const historyBtn = document.getElementById('historyBtn');
     const historyRange = document.getElementById('historyRange');
 
-    const nameInput = document.getElementById('nameInput');
+    const accountInput = document.getElementById('accountInput');
     const valueInput = document.getElementById('valueInput');
-    const categoryInput = document.getElementById('categoryInput');
     const recurrenceInput = document.getElementById('recurrenceInput');
     const addBtn = document.getElementById('addBtn');
 
@@ -354,6 +337,27 @@
 
       yearSelect.value = '2026';
       monthSelect.value = '3';
+
+      updateMonthOptions();
+    }
+
+    function updateMonthOptions() {
+      const selectedYear = Number(yearSelect.value);
+      const currentMonth = Number(monthSelect.value);
+
+      Array.from(monthSelect.options).forEach((option, index) => {
+        if (selectedYear === 2026 && index < 3) {
+          option.disabled = true;
+          option.hidden = true;
+        } else {
+          option.disabled = false;
+          option.hidden = false;
+        }
+      });
+
+      if (selectedYear === 2026 && currentMonth < 3) {
+        monthSelect.value = '3';
+      }
     }
 
     function getSelectedYear() {
@@ -407,6 +411,7 @@
     function getTotalForYear(year) {
       let total = 0;
       for (let month = 0; month < 12; month++) {
+        if (year === 2026 && month < 3) continue;
         total += getTotalForMonth(month, year);
       }
       return total;
@@ -429,11 +434,10 @@
       itemsList.innerHTML = items.map(item => `
         <div class="item-row flex items-stretch">
           <div class="flex-1 px-4 py-3 flex items-center gap-3 min-w-0">
-            <span class="text-slate-100 font-medium truncate">${escapeHtml(item.name)}</span>
-            <span class="text-xs bg-slate-700 text-slate-200 px-2 py-1 rounded-full whitespace-nowrap">${escapeHtml(item.category)}</span>
+            <span class="text-slate-100 font-medium truncate">${escapeHtml(item.account)}</span>
             <span class="text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded-full whitespace-nowrap">${labelRecurrence(item.recurrence)}</span>
           </div>
-          <div class="w-28 px-4 py-3 border-l border-slate-500 flex items-center justify-start">
+          <div class="w-32 px-4 py-3 border-l border-slate-500 flex items-center justify-start">
             ${formatCurrency(item.value)}
           </div>
           <button
@@ -468,7 +472,7 @@
         resumeList.innerHTML = '<li>—</li>';
       } else {
         resumeList.innerHTML = items.map(item => `
-          <li>${escapeHtml(item.name)} (${labelRecurrence(item.recurrence).toLowerCase()})</li>
+          <li>${escapeHtml(item.account)} (${labelRecurrence(item.recurrence).toLowerCase()})</li>
         `).join('');
       }
     }
@@ -517,15 +521,14 @@
     }
 
     function addItem() {
-      const name = nameInput.value.trim();
+      const account = accountInput.value;
       const value = Number(valueInput.value);
-      const category = categoryInput.value;
       const recurrence = recurrenceInput.value;
       const month = getSelectedMonth();
       const year = getSelectedYear();
 
-      if (!name) {
-        alert('Digite o nome da conta.');
+      if (!account) {
+        alert('Selecione a conta.');
         return;
       }
 
@@ -536,9 +539,8 @@
 
       const item = {
         id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()),
-        name,
+        account,
         value,
-        category,
         recurrence,
         month,
         year
@@ -547,9 +549,8 @@
       data.push(item);
       saveData();
 
-      nameInput.value = '';
+      accountInput.value = '';
       valueInput.value = '';
-      categoryInput.value = 'Água';
       recurrenceInput.value = 'mensal';
 
       renderAll();
@@ -581,9 +582,7 @@
 
     monthSelect.addEventListener('change', renderAll);
     yearSelect.addEventListener('change', () => {
-      if (getSelectedYear() === 2026 && getSelectedMonth() < 3) {
-        monthSelect.value = '3';
-      }
+      updateMonthOptions();
       renderAll();
     });
 
@@ -592,6 +591,7 @@
       const point = historyTimeline[index];
 
       yearSelect.value = point.year;
+      updateMonthOptions();
       monthSelect.value = point.month;
       renderAll();
     });
