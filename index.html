@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Controle de Contas Recorrentes</title>
+
+  <script>
+    tailwind.config = { darkMode: 'class' };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    rel="stylesheet"
+  />
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    :root {
+      --bg-main: #030712;
+      --bg-card: rgba(17, 24, 39, 0.82);
+      --border: rgba(255, 255, 255, 0.08);
+      --text-main: #F9FAFB;
+      --text-soft: #9CA3AF;
+      --accent: #8B5CF6;
+      --accent-2: #EC4899;
+      --success: #10B981;
+      --danger: #EF4444;
+      --warning: #F59E0B;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(139, 92, 246, 0.22), transparent 28%),
+        radial-gradient(circle at top right, rgba(236, 72, 153, 0.18), transparent 24%),
+        linear-gradient(180deg, #020617 0%, #030712 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+    }
+
+    .glass {
+      background: var(--bg-card);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--border);
+      box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+
+    .gradient-text {
+      background: linear-gradient(90deg, #c084fc 0%, #f472b6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .input-dark,
+    .select-dark {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #F9FAFB;
+      border-radius: 14px;
+      padding: 0.85rem 1rem;
+      outline: none;
+      transition: 0.2s ease;
+    }
+
+    .input-dark::placeholder {
+      color: #9CA3AF;
+    }
+
+    .input-dark:focus,
+    .select-dark:focus {
+      border-color: rgba(168, 85, 247, 0.7);
+      box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.14);
+    }
+
+    .btn-primary {
+      background: linear-gradient(90deg, #7c3aed 0%, #ec4899 100%);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      padding: 0.9rem 1.1rem;
+      font-weight: 700;
+      transition: 0.2s ease;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.06);
+      color: #F9FAFB;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 0.9rem 1.1rem;
+      font-weight: 600;
+      transition: 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.38rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.06);
+      color: #E5E7EB;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .mini-card {
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      border-radius: 18px;
+    }
+
+    .month-card {
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .month-card-header {
+      background: linear-gradient(90deg, rgba(124,58,237,0.18), rgba(236,72,153,0.12));
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .badge-type {
+      font-size: 0.75rem;
+      padding: 0.3rem 0.55rem;
+      border-radius: 999px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .type-mensal { background: rgba(16, 185, 129, 0.12); color: #6EE7B7; }
+    .type-anual { background: rgba(245, 158, 11, 0.12); color: #FCD34D; }
+    .type-parcelado { background: rgba(59, 130, 246, 0.12); color: #93C5FD; }
+    .type-unico { background: rgba(236, 72, 153, 0.12); color: #F9A8D4; }
+
+    .money-positive { color: #A7F3D0; }
+    .money-accent { color: #DDD6FE; }
+
+    .danger-btn {
+      background: rgba(239, 68, 68, 0.12);
+      color: #FCA5A5;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .danger-btn:hover {
+      background: rgba(239, 68, 68, 0.18);
+    }
+
+    .table-row + .table-row {
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .empty-state {
+      border: 1px dashed rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.02);
+    }
+
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.12);
+      border-radius: 999px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+  </style>
+</head>
+<body>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <header class="glass rounded-3xl p-6 md:p-8 mb-8">
+      <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 text-sm text-gray-300 mb-4">
+            <i class="fa-solid fa-file-invoice-dollar text-violet-300"></i>
+            Controle de contas e compromissos
+          </div>
+
+          <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mb-3">
+            Organize suas contas com um
+            <span class="gradient-text">painel simples e claro</span>
+          </h1>
+
+          <p class="text-gray-300 max-w-3xl leading-relaxed">
+            Cadastre despesas recorrentes ou pontuais, acompanhe os valores mês a mês e veja quanto já está comprometido a partir de abril de 2026.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full xl:max-w-2xl">
+          <div class="mini-card p-4">
+            <p class="text-sm text-gray-400 mb-1">Total cadastrado</p>
+            <p id="totalItems" class="text-2xl font-extrabold">0</p>
+          </div>
+          <div class="mini-card p-4">
+            <p class="text-sm text-gray-400 mb-1">Próximo mês</p>
+            <p id="nextMonthTotal" class="text-2xl font-extrabold money-accent">R$ 0,00</p>
+          </div>
+          <div class="mini-card p-4">
+            <p class="text-sm text-gray-400 mb-1">Maior mês</p>
+            <p id="highestMonthTotal" class="text-2xl font-extrabold money-positive">R$ 0,00</p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="grid grid-cols-1 xl:grid-cols-5 gap-8">
+      <div class="xl:col-span-2">
+        <div class="glass rounded-3xl p-6 md:p-7 sticky top-6">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-11 h-11 rounded-2xl bg-violet-500/15 flex items-center justify-center text-violet-300 text-lg">
+              <i class="fa-solid fa-plus"></i>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold">Adicionar compromisso</h2>
+              <p class="text-sm text-gray-400">Cadastre água, luz, telefone, parcelas, seguro, anuidades e o que mais precisar.</p>
+            </div>
+          </div>
+
+          <form id="billForm" class="space-y-4">
+            <div>
+              <label class="block text-sm text-gray-300 mb-2">Nome da conta</label>
+              <input
+                id="name"
+                type="text"
+                class="input-dark"
+                placeholder="Ex.: Conta de água, Seguro do carro, Parcela do celular"
+                required
+              />
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-gray-300 mb-2">Valor (R$)</label>
+                <input
+                  id="value"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  class="input-dark"
+                  placeholder="0,00"
+                  required
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm text-gray-300 mb-2">Tipo</label>
+                <select id="type" class="select-dark" required>
+                  <option value="mensal">Mensal</option>
+                  <option value="anual">Anual</option>
+                  <option value="parcelado">Parcelado</option>
+                  <option value="unico">Lançamento único</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-gray-300 mb-2">Mês de início</label>
+                <select id="startMonth" class="select-dark" required></select>
+              </div>
+
+              <div id="installmentsWrapper" class="hidden">
+                <label class="block text-sm text-gray-300 mb-2">Quantidade de parcelas</label>
+                <input
+                  id="installments"
+                  type="number"
+                  min="1"
+                  step="1"
+                  class="input-dark"
+                  placeholder="Ex.: 12"
+                />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-gray-300 mb-2">Categoria</label>
+                <select id="category" class="select-dark">
+                  <option value="Água">Água</option>
+                  <option value="Luz">Luz</option>
+                  <option value="Telefone">Telefone</option>
+                  <option value="Televisão">Televisão</option>
+                  <option value="Celular">Celular</option>
+                  <option value="Seguro">Seguro</option>
+                  <option value="Anuidade">Anuidade</option>
+                  <option value="Outro">Outro</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm text-gray-300 mb-2">Observação</label>
+                <input
+                  id="note"
+                  type="text"
+                  class="input-dark"
+                  placeholder="Opcional"
+                />
+              </div>
+            </div>
+
+            <button type="submit" class="btn-primary w-full">
+              <i class="fa-solid fa-floppy-disk mr-2"></i>
+              Adicionar compromisso
+            </button>
+          </form>
+
+          <div class="mt-6 pt-6 border-t border-white/10">
+            <div class="flex flex-wrap gap-2">
+              <span class="pill"><i class="fa-solid fa-repeat text-emerald-300"></i> Mensal</span>
+              <span class="pill"><i class="fa-solid fa-calendar-days text-amber-300"></i> Anual</span>
+              <span class="pill"><i class="fa-solid fa-layer-group text-sky-300"></i> Parcelado</span>
+              <span class="pill"><i class="fa-solid fa-bolt text-pink-300"></i> Único</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="xl:col-span-3 space-y-8">
+        <div class="glass rounded-3xl p-6 md:p-7">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            <div>
+              <h2 class="text-xl font-bold">Compromissos cadastrados</h2>
+              <p class="text-sm text-gray-400">Remova qualquer item e a projeção mensal será recalculada automaticamente.</p>
+            </div>
+
+            <button id="clearAllBtn" class="btn-secondary danger-btn">
+              <i class="fa-solid fa-trash-can mr-2"></i>
+              Limpar tudo
+            </button>
+          </div>
+
+          <div id="registeredList" class="space-y-3"></div>
+        </div>
+
+        <div class="glass rounded-3xl p-6 md:p-7">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            <div>
+              <h2 class="text-xl font-bold">Projeção mensal</h2>
+              <p class="text-sm text-gray-400">Meses exibidos a partir de abril de 2026, com soma automática dos lançamentos.</p>
+            </div>
+
+            <div class="pill">
+              <i class="fa-solid fa-calendar-check text-violet-300"></i>
+              Abril/2026 em diante
+            </div>
+          </div>
+
+          <div id="monthsGrid" class="grid grid-cols-1 2xl:grid-cols-2 gap-5"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "controle_contas_recorrentes_v1";
+    const START_YEAR = 2026;
+    const START_MONTH_INDEX = 3; // abril = 3
+    const TOTAL_MONTHS = 24;
+
+    const monthNames = [
+      "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+      "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+    ];
+
+    const form = document.getElementById("billForm");
+    const nameInput = document.getElementById("name");
+    const valueInput = document.getElementById("value");
+    const typeInput = document.getElementById("type");
+    const startMonthInput = document.getElementById("startMonth");
+    const installmentsInput = document.getElementById("installments");
+    const installmentsWrapper = document.getElementById("installmentsWrapper");
+    const categoryInput = document.getElementById("category");
+    const noteInput = document.getElementById("note");
+
+    const registeredList = document.getElementById("registeredList");
+    const monthsGrid = document.getElementById("monthsGrid");
+    const totalItemsEl = document.getElementById("totalItems");
+    const nextMonthTotalEl = document.getElementById("nextMonthTotal");
+    const highestMonthTotalEl = document.getElementById("highestMonthTotal");
+    const clearAllBtn = document.getElementById("clearAllBtn");
+
+    let bills = loadBills();
+
+    function currency(value) {
+      return value.toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+      });
+    }
+
+    function saveBills() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(bills));
+    }
+
+    function loadBills() {
+      try {
+        const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        return Array.isArray(data) ? data : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function generateMonthOptions() {
+      const months = [];
+      let year = START_YEAR;
+      let month = START_MONTH_INDEX;
+
+      for (let i = 0; i < TOTAL_MONTHS; i++) {
+        months.push({
+          key: `${year}-${String(month + 1).padStart(2, "0")}`,
+          label: `${monthNames[month]}/${year}`,
+          year,
+          month
+        });
+
+        month++;
+        if (month > 11) {
+          month = 0;
+          year++;
+        }
+      }
+
+      startMonthInput.innerHTML = months
+        .map((m) => `<option value="${m.key}">${m.label}</option>`)
+        .join("");
+
+      return months;
+    }
+
+    const allMonths = generateMonthOptions();
+
+    function getTypeLabel(type) {
+      const labels = {
+        mensal: "Mensal",
+        anual: "Anual",
+        parcelado: "Parcelado",
+        unico: "Único"
+      };
+      return labels[type] || type;
+    }
+
+    function getTypeClass(type) {
+      const classes = {
+        mensal: "type-mensal",
+        anual: "type-anual",
+        parcelado: "type-parcelado",
+        unico: "type-unico"
+      };
+      return classes[type] || "type-unico";
+    }
+
+    function parseMonthKey(key) {
+      const [year, month] = key.split("-").map(Number);
+      return { year, month: month - 1 };
+    }
+
+    function monthDiff(a, b) {
+      return (b.year - a.year) * 12 + (b.month - a.month);
+    }
+
+    function occursInMonth(bill, monthObj) {
+      const start = parseMonthKey(bill.startMonth);
+      const diff = monthDiff(start, monthObj);
+
+      if (diff < 0) return false;
+
+      if (bill.type === "mensal") {
+        return true;
+      }
+
+      if (bill.type === "anual") {
+        return diff % 12 === 0;
+      }
+
+      if (bill.type === "parcelado") {
+        return diff < bill.installments;
+      }
+
+      if (bill.type === "unico") {
+        return diff === 0;
+      }
+
+      return false;
+    }
+
+    function buildProjection() {
+      return allMonths.map((month) => {
+        const items = bills.filter((bill) => occursInMonth(bill, month));
+        const total = items.reduce((sum, item) => sum + Number(item.value), 0);
+
+        return {
+          ...month,
+          items,
+          total
+        };
+      });
+    }
+
+    function renderRegisteredList() {
+      totalItemsEl.textContent = bills.length;
+
+      if (!bills.length) {
+        registeredList.innerHTML = `
+          <div class="empty-state rounded-2xl p-6 text-center">
+            <div class="w-14 h-14 mx-auto mb-4 rounded-2xl bg-white/5 flex items-center justify-center text-gray-400 text-xl">
+              <i class="fa-solid fa-receipt"></i>
+            </div>
+            <p class="text-gray-200 font-semibold mb-1">Nenhum compromisso cadastrado ainda</p>
+            <p class="text-sm text-gray-400">
+              Adicione sua primeira conta no formulário ao lado para começar.
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      registeredList.innerHTML = bills
+        .map((bill) => `
+          <div class="mini-card p-4 md:p-5">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2 mb-2">
+                  <h3 class="font-bold text-lg leading-snug">${escapeHtml(bill.name)}</h3>
+                  <span class="badge-type ${getTypeClass(bill.type)}">${getTypeLabel(bill.type)}</span>
+                  <span class="pill">${escapeHtml(bill.category)}</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-300">
+                  <p><span class="text-gray-400">Valor:</span> ${currency(Number(bill.value))}</p>
+                  <p><span class="text-gray-400">Início:</span> ${formatMonthLabel(bill.startMonth)}</p>
+                  ${
+                    bill.type === "parcelado"
+                      ? `<p><span class="text-gray-400">Parcelas:</span> ${bill.installments}</p>`
+                      : ""
+                  }
+                  ${
+                    bill.note
+                      ? `<p class="md:col-span-2"><span class="text-gray-400">Obs.:</span> ${escapeHtml(bill.note)}</p>`
+                      : ""
+                  }
+                </div>
+              </div>
+
+              <div class="flex items-center">
+                <button
+                  class="btn-secondary danger-btn w-full lg:w-auto"
+                  onclick="removeBill('${bill.id}')"
+                >
+                  <i class="fa-solid fa-trash mr-2"></i>
+                  Remover
+                </button>
+              </div>
+            </div>
+          </div>
+        `)
+        .join("");
+    }
+
+    function renderMonths() {
+      const projection = buildProjection();
+
+      const highest = projection.reduce((acc, month) => month.total > acc.total ? month : acc, { total: 0 });
+      const firstProjected = projection[0];
+
+      nextMonthTotalEl.textContent = currency(firstProjected?.total || 0);
+      highestMonthTotalEl.textContent = currency(highest?.total || 0);
+
+      monthsGrid.innerHTML = projection
+        .map((month) => `
+          <div class="month-card">
+            <div class="month-card-header p-5">
+              <div class="flex items-center justify-between gap-4">
+                <div>
+                  <h3 class="text-lg font-bold">${month.label}</h3>
+                  <p class="text-sm text-gray-300">${month.items.length} item(ns) lançado(s)</p>
+                </div>
+                <div class="text-right">
+                  <p class="text-xs uppercase tracking-wide text-gray-400 mb-1">Total do mês</p>
+                  <p class="text-xl font-extrabold money-positive">${currency(month.total)}</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-4">
+              ${
+                month.items.length
+                  ? `
+                    <div class="rounded-2xl overflow-hidden border border-white/6">
+                      ${month.items.map((item, index) => `
+                        <div class="table-row p-4 flex items-start justify-between gap-4 ${index > 0 ? 'border-t border-white/6' : ''}">
+                          <div class="min-w-0">
+                            <p class="font-semibold leading-snug">${escapeHtml(item.name)}</p>
+                            <div class="flex flex-wrap gap-2 mt-2">
+                              <span class="pill">${escapeHtml(item.category)}</span>
+                              <span class="badge-type ${getTypeClass(item.type)}">${getTypeLabel(item.type)}</span>
+                            </div>
+                            ${
+                              item.note
+                                ? `<p class="text-sm text-gray-400 mt-2">${escapeHtml(item.note)}</p>`
+                                : ""
+                            }
+                          </div>
+                          <div class="text-right shrink-0">
+                            <p class="font-bold">${currency(Number(item.value))}</p>
+                          </div>
+                        </div>
+                      `).join("")}
+                    </div>
+                  `
+                  : `
+                    <div class="empty-state rounded-2xl p-5 text-center">
+                      <p class="text-gray-300 font-medium">Nenhum lançamento neste mês</p>
+                      <p class="text-sm text-gray-500 mt-1">Silêncio financeiro. Milagre raro, mas bonito de ver.</p>
+                    </div>
+                  `
+              }
+            </div>
+          </div>
+        `)
+        .join("");
+    }
+
+    function formatMonthLabel(key) {
+      const parsed = parseMonthKey(key);
+      return `${monthNames[parsed.month]}/${parsed.year}`;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text ?? "";
+      return div.innerHTML;
+    }
+
+    function updateInstallmentsVisibility() {
+      if (typeInput.value === "parcelado") {
+        installmentsWrapper.classList.remove("hidden");
+        installmentsInput.required = true;
+      } else {
+        installmentsWrapper.classList.add("hidden");
+        installmentsInput.required = false;
+        installmentsInput.value = "";
+      }
+    }
+
+    function removeBill(id) {
+      bills = bills.filter((bill) => bill.id !== id);
+      saveBills();
+      renderAll();
+    }
+
+    function clearAllBills() {
+      const ok = confirm("Tem certeza que deseja apagar todos os compromissos cadastrados?");
+      if (!ok) return;
+
+      bills = [];
+      saveBills();
+      renderAll();
+    }
+
+    function renderAll() {
+      renderRegisteredList();
+      renderMonths();
+    }
+
+    typeInput.addEventListener("change", updateInstallmentsVisibility);
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const name = nameInput.value.trim();
+      const value = Number(valueInput.value);
+      const type = typeInput.value;
+      const startMonth = startMonthInput.value;
+      const category = categoryInput.value;
+      const note = noteInput.value.trim();
+      const installments = Number(installmentsInput.value);
+
+      if (!name || !value || value <= 0 || !startMonth) {
+        alert("Preencha nome, valor e mês de início corretamente.");
+        return;
+      }
+
+      if (type === "parcelado" && (!installments || installments < 1)) {
+        alert("Informe a quantidade de parcelas.");
+        return;
+      }
+
+      const newBill = {
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()),
+        name,
+        value,
+        type,
+        startMonth,
+        category,
+        note,
+        installments: type === "parcelado" ? installments : null
+      };
+
+      bills.push(newBill);
+      saveBills();
+      form.reset();
+      startMonthInput.value = allMonths[0].key;
+      categoryInput.value = "Água";
+      typeInput.value = "mensal";
+      updateInstallmentsVisibility();
+      renderAll();
+    });
+
+    clearAllBtn.addEventListener("click", clearAllBills);
+
+    window.removeBill = removeBill;
+
+    startMonthInput.value = allMonths[0].key;
+    updateInstallmentsVisibility();
+    renderAll();
+  </script>
+</body>
+</html>
