@@ -123,6 +123,31 @@
     .muted {
       color: #cbd5e1;
     }
+
+    .item-paid {
+      opacity: 0.7;
+    }
+
+    .item-paid .item-label {
+      text-decoration: line-through;
+      color: #94a3b8;
+    }
+
+    .btn-green {
+      background: #16a34a;
+    }
+
+    .btn-green:hover {
+      background: #15803d;
+    }
+
+    .btn-gray-paid {
+      background: #475569;
+    }
+
+    .btn-gray-paid:hover {
+      background: #334155;
+    }
   </style>
 </head>
 <body>
@@ -144,15 +169,10 @@
       </button>
     </section>
 
-    <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
       <div class="summary-card summary-green p-5">
         <p class="text-slate-400 font-semibold mb-2">Total do Mês</p>
         <p id="totalMonthCard" class="text-3xl font-extrabold">R$ 0,00</p>
-      </div>
-
-      <div class="summary-card summary-orange p-5">
-        <p class="text-slate-400 font-semibold mb-2">Total Anual</p>
-        <p id="totalYearCard" class="text-3xl font-extrabold">R$ 0,00</p>
       </div>
 
       <div class="summary-card summary-blue p-5">
@@ -181,7 +201,6 @@
       <div class="text-center mt-3">
         <p id="historyTitle" class="text-xl font-semibold mb-2">abril de 2026</p>
         <p class="text-green-400 font-semibold">Total do mês: <span id="historyMonthTotal">R$ 0,00</span></p>
-        <p class="text-orange-400 font-semibold">Total anual acumulado: <span id="historyYearTotal">R$ 0,00</span></p>
         <p class="text-blue-300 font-semibold">Quantidade de contas: <span id="historyCount">0</span></p>
       </div>
     </section>
@@ -201,7 +220,6 @@
               <option>Conta de luz</option>
               <option>Conta de telefone</option>
               <option>Parcela da televisão</option>
-              <option>Parcela do celular</option>
               <option>Seguro do carro</option>
               <option>Anuidade</option>
               <option>Outro</option>
@@ -245,10 +263,6 @@
           <span id="resumeMonthTotal">R$ 0,00</span>
         </p>
         <p>
-          <span class="font-semibold text-orange-400">Total do ano:</span>
-          <span id="resumeYearTotal">R$ 0,00</span>
-        </p>
-        <p>
           <span class="font-semibold text-blue-300">Quantidade de contas no mês:</span>
           <span id="resumeCount">0</span>
         </p>
@@ -263,6 +277,7 @@
 
   <script>
     const STORAGE_KEY = 'controle-contas-layout-gestao-v2';
+    const PAYMENTS_KEY = 'controle-contas-payments-v1';
 
     const months = [
       'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -280,23 +295,21 @@
     const addBtn = document.getElementById('addBtn');
 
     const totalMonthCard = document.getElementById('totalMonthCard');
-    const totalYearCard = document.getElementById('totalYearCard');
     const countCard = document.getElementById('countCard');
 
     const itemsList = document.getElementById('itemsList');
 
     const resumeMonthTotal = document.getElementById('resumeMonthTotal');
-    const resumeYearTotal = document.getElementById('resumeYearTotal');
     const resumeCount = document.getElementById('resumeCount');
     const resumeList = document.getElementById('resumeList');
 
     const historyMonthLabel = document.getElementById('historyMonthLabel');
     const historyTitle = document.getElementById('historyTitle');
     const historyMonthTotal = document.getElementById('historyMonthTotal');
-    const historyYearTotal = document.getElementById('historyYearTotal');
     const historyCount = document.getElementById('historyCount');
 
     let data = loadData();
+    let payments = loadPayments();
 
     function loadData() {
       try {
@@ -309,6 +322,36 @@
 
     function saveData() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function loadPayments() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(PAYMENTS_KEY));
+        return saved && typeof saved === 'object' ? saved : {};
+      } catch {
+        return {};
+      }
+    }
+
+    function savePayments() {
+      localStorage.setItem(PAYMENTS_KEY, JSON.stringify(payments));
+    }
+
+    function paymentKey(itemId, year, month) {
+      return `${itemId}_${year}_${month}`;
+    }
+
+    function isPaid(itemId, year, month) {
+      return !!payments[paymentKey(itemId, year, month)];
+    }
+
+    function togglePaid(itemId) {
+      const year = getSelectedYear();
+      const month = getSelectedMonth();
+      const key = paymentKey(itemId, year, month);
+      payments[key] = !payments[key];
+      savePayments();
+      renderItems();
     }
 
     function formatCurrency(value) {
@@ -431,15 +474,28 @@
         return;
       }
 
-      itemsList.innerHTML = items.map(item => `
-        <div class="item-row flex items-stretch">
+      const selectedMonth = getSelectedMonth();
+      const selectedYear = getSelectedYear();
+
+      itemsList.innerHTML = items.map(item => {
+        const paid = isPaid(item.id, selectedYear, selectedMonth);
+        return `
+        <div class="item-row flex items-stretch${paid ? ' item-paid' : ''}">
           <div class="flex-1 px-4 py-3 flex items-center gap-3 min-w-0">
-            <span class="text-slate-100 font-medium truncate">${escapeHtml(item.account)}</span>
+            ${paid ? '<i class="fa-solid fa-circle-check text-green-400 flex-shrink-0"></i>' : ''}
+            <span class="text-slate-100 font-medium truncate item-label">${escapeHtml(item.account)}</span>
             <span class="text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded-full whitespace-nowrap">${labelRecurrence(item.recurrence)}</span>
           </div>
           <div class="w-32 px-4 py-3 border-l border-slate-500 flex items-center justify-start">
             ${formatCurrency(item.value)}
           </div>
+          <button
+            class="${paid ? 'btn-green' : 'btn-gray-paid'} text-white px-4 py-3 transition border-l border-slate-500"
+            onclick="togglePaid('${item.id}')"
+            title="${paid ? 'Marcar como não pago' : 'Marcar como pago'}"
+          >
+            <i class="fa-solid ${paid ? 'fa-rotate-left' : 'fa-check'}"></i>
+          </button>
           <button
             class="btn-red text-white px-4 py-3 transition"
             onclick="removeItem('${item.id}')"
@@ -448,7 +504,7 @@
             <i class="fa-solid fa-trash"></i>
           </button>
         </div>
-      `).join('');
+      `}).join('');
     }
 
     function renderSummary() {
@@ -456,16 +512,13 @@
       const selectedYear = getSelectedYear();
 
       const monthTotal = getTotalForMonth(selectedMonth, selectedYear);
-      const yearTotal = getTotalForYear(selectedYear);
       const count = getCountForMonth(selectedMonth, selectedYear);
       const items = getItemsForMonth(selectedMonth, selectedYear);
 
       totalMonthCard.textContent = formatCurrency(monthTotal);
-      totalYearCard.textContent = formatCurrency(yearTotal);
       countCard.textContent = count;
 
       resumeMonthTotal.textContent = formatCurrency(monthTotal);
-      resumeYearTotal.textContent = formatCurrency(yearTotal);
       resumeCount.textContent = count;
 
       if (!items.length) {
@@ -498,13 +551,11 @@
       const point = historyTimeline[index];
       const monthLabel = getMonthLabel(point.month, point.year);
       const monthTotal = getTotalForMonth(point.month, point.year);
-      const yearTotal = getTotalForYear(point.year);
       const count = getCountForMonth(point.month, point.year);
 
       historyMonthLabel.innerHTML = `<i class="fa-solid fa-calendar-days"></i> ${monthLabel}`;
       historyTitle.textContent = monthLabel;
       historyMonthTotal.textContent = formatCurrency(monthTotal);
-      historyYearTotal.textContent = formatCurrency(yearTotal);
       historyCount.textContent = count;
     }
 
@@ -577,6 +628,7 @@
     }
 
     window.removeItem = removeItem;
+    window.togglePaid = togglePaid;
 
     addBtn.addEventListener('click', addItem);
 
