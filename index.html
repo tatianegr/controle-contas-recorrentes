@@ -160,6 +160,25 @@
       background: #334155;
     }
 
+    .btn-yellow {
+      background: #ca8a04;
+    }
+
+    .btn-yellow:hover {
+      background: #a16207;
+    }
+
+    .edit-value-input {
+      background: #1e293b;
+      border: 1px solid #60a5fa;
+      color: #f8fafc;
+      border-radius: 6px;
+      padding: 4px 8px;
+      width: 90px;
+      font-size: 0.9rem;
+      outline: none;
+    }
+
     .select-dark option {
       background: #334155;
       color: #f8fafc;
@@ -479,6 +498,7 @@
 
       itemsList.innerHTML = items.map(item => {
         const paid = isPaid(item.id, selectedYear, selectedMonth);
+        const editing = editingId === item.id;
         return `
         <div class="item-row flex items-stretch${paid ? ' item-paid' : ''}">
           <div class="flex-1 px-4 py-3 flex items-center gap-3 min-w-0">
@@ -486,23 +506,22 @@
             <span class="text-slate-100 font-medium truncate item-label">${escapeHtml(item.account)}</span>
             <span class="text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded-full whitespace-nowrap">${labelRecurrence(item.recurrence)}</span>
           </div>
-          <div class="w-32 px-4 py-3 border-l border-slate-500 flex items-center justify-start">
-            ${formatCurrency(item.value)}
+          <div class="w-36 px-3 py-3 border-l border-slate-500 flex items-center justify-start">
+            ${editing
+              ? `<input class="edit-value-input" type="number" min="0" step="0.01" value="${item.value}"
+                   onkeydown="handleEditKey(event, '${item.id}')"
+                   onblur="cancelEdit()"
+                   id="edit-input-${item.id}">`
+              : formatCurrency(item.value)
+            }
           </div>
-          <button
-            class="${paid ? 'btn-green' : 'btn-gray-paid'} text-white px-4 py-3 transition border-l border-slate-500"
-            onclick="togglePaid('${item.id}')"
-            title="${paid ? 'Marcar como não pago' : 'Marcar como pago'}"
-          >
-            <i class="fa-solid ${paid ? 'fa-rotate-left' : 'fa-check'}"></i>
-          </button>
-          <button
-            class="btn-red text-white px-4 py-3 transition"
-            onclick="removeItem('${item.id}')"
-            title="Remover"
-          >
-            <i class="fa-solid fa-trash"></i>
-          </button>
+          ${editing
+            ? `<button class="btn-green text-white px-4 py-3 transition border-l border-slate-500" onmousedown="saveEdit('${item.id}')" title="Salvar"><i class="fa-solid fa-check"></i></button>
+               <button class="btn-red text-white px-4 py-3 transition" onmousedown="cancelEdit()" title="Cancelar"><i class="fa-solid fa-xmark"></i></button>`
+            : `<button class="btn-yellow text-white px-4 py-3 transition border-l border-slate-500" onclick="startEdit('${item.id}')" title="Editar valor"><i class="fa-solid fa-pen"></i></button>
+               <button class="${paid ? 'btn-green' : 'btn-gray-paid'} text-white px-4 py-3 transition border-l border-slate-500" onclick="togglePaid('${item.id}')" title="${paid ? 'Marcar como não pago' : 'Marcar como pago'}"><i class="fa-solid ${paid ? 'fa-rotate-left' : 'fa-check'}"></i></button>
+               <button class="btn-red text-white px-4 py-3 transition" onclick="removeItem('${item.id}')" title="Remover"><i class="fa-solid fa-trash"></i></button>`
+          }
         </div>
       `}).join('');
     }
@@ -613,6 +632,35 @@
       renderAll();
     }
 
+    let editingId = null;
+
+    function startEdit(id) {
+      editingId = id;
+      renderItems();
+      const input = document.getElementById(`edit-input-${id}`);
+      if (input) { input.focus(); input.select(); }
+    }
+
+    function saveEdit(id) {
+      const input = document.getElementById(`edit-input-${id}`);
+      const newValue = input ? Number(input.value) : null;
+      if (!newValue || newValue <= 0) { cancelEdit(); return; }
+      const item = data.find(i => i.id === id);
+      if (item) { item.value = newValue; saveData(); }
+      editingId = null;
+      renderAll();
+    }
+
+    function cancelEdit() {
+      editingId = null;
+      renderItems();
+    }
+
+    function handleEditKey(e, id) {
+      if (e.key === 'Enter') saveEdit(id);
+      if (e.key === 'Escape') cancelEdit();
+    }
+
     function renderAll() {
       renderItems();
       renderSummary();
@@ -629,6 +677,10 @@
 
     window.removeItem = removeItem;
     window.togglePaid = togglePaid;
+    window.startEdit = startEdit;
+    window.saveEdit = saveEdit;
+    window.cancelEdit = cancelEdit;
+    window.handleEditKey = handleEditKey;
 
     addBtn.addEventListener('click', addItem);
 
