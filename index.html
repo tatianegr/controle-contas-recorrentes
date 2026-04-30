@@ -477,9 +477,6 @@
         return;
       }
 
-      const selectedMonth = getSelectedMonth();
-      const selectedYear = getSelectedYear();
-
       itemsList.innerHTML = items.map(item => {
         const paid = isPaid(item.id, selectedYear, selectedMonth);
         return `
