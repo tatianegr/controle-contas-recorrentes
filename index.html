@@ -370,37 +370,24 @@
         yearSelect.appendChild(option);
       }
 
-      monthSelect.innerHTML = '';
-      months.forEach((month, index) => {
-        const option = document.createElement('option');
-        option.value = index;
-        option.textContent = month;
-        monthSelect.appendChild(option);
-      });
-
       yearSelect.value = '2026';
-      monthSelect.value = '3';
-
-      updateMonthOptions();
+      updateMonthOptions(3);
     }
 
-    function updateMonthOptions() {
+    function updateMonthOptions(defaultMonth) {
       const selectedYear = Number(yearSelect.value);
-      const currentMonth = Number(monthSelect.value);
+      const currentMonth = defaultMonth !== undefined ? defaultMonth : Number(monthSelect.value);
+      const startMonth = selectedYear === 2026 ? 3 : 0;
 
-      Array.from(monthSelect.options).forEach((option, index) => {
-        if (selectedYear === 2026 && index < 3) {
-          option.disabled = true;
-          option.hidden = true;
-        } else {
-          option.disabled = false;
-          option.hidden = false;
-        }
-      });
-
-      if (selectedYear === 2026 && currentMonth < 3) {
-        monthSelect.value = '3';
+      monthSelect.innerHTML = '';
+      for (let i = startMonth; i < 12; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = months[i];
+        monthSelect.appendChild(option);
       }
+
+      monthSelect.value = currentMonth >= startMonth ? currentMonth : startMonth;
     }
 
     function getSelectedYear() {
@@ -643,8 +630,7 @@
       const point = historyTimeline[index];
 
       yearSelect.value = point.year;
-      updateMonthOptions();
-      monthSelect.value = point.month;
+      updateMonthOptions(point.month);
       renderAll();
     });
 
