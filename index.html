@@ -308,6 +308,21 @@
         <ul id="resumeList" class="list-disc pl-5 text-slate-100"></ul>
       </div>
     </section>
+
+    <section class="app-card p-5 md:p-6 mt-8">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-2xl font-bold">Copiar Resumo</h3>
+        <button id="copyBtn" class="btn-blue text-white font-semibold px-4 py-2 rounded-xl transition text-sm">
+          <i class="fa-solid fa-copy mr-2"></i>Copiar
+        </button>
+      </div>
+      <textarea
+        id="copyText"
+        class="input-dark font-mono text-sm leading-relaxed resize-none"
+        rows="8"
+        readonly
+      ></textarea>
+    </section>
   </div>
 
   <script>
@@ -661,9 +676,29 @@
       if (e.key === 'Escape') cancelEdit();
     }
 
+    function formatValueShort(value) {
+      const n = Number(value);
+      const s = n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return s.endsWith(',00') ? s.slice(0, -3) : s;
+    }
+
+    function renderCopyText() {
+      const month = getSelectedMonth();
+      const year = getSelectedYear();
+      const items = getItemsForMonth(month, year);
+      const total = getTotalForMonth(month, year);
+
+      const lines = items.map(item => `${item.account}: ${formatValueShort(item.value)}`);
+      lines.push('');
+      lines.push(`Total: ${formatValueShort(total)}`);
+
+      document.getElementById('copyText').value = lines.join('\n');
+    }
+
     function renderAll() {
       renderItems();
       renderSummary();
+      renderCopyText();
 
       const currentIndex = historyTimeline.findIndex(
         point => point.month === getSelectedMonth() && point.year === getSelectedYear()
@@ -681,6 +716,15 @@
     window.saveEdit = saveEdit;
     window.cancelEdit = cancelEdit;
     window.handleEditKey = handleEditKey;
+
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      const text = document.getElementById('copyText').value;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('copyBtn');
+        btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i>Copiado!';
+        setTimeout(() => { btn.innerHTML = '<i class="fa-solid fa-copy mr-2"></i>Copiar'; }, 2000);
+      });
+    });
 
     addBtn.addEventListener('click', addItem);
 
