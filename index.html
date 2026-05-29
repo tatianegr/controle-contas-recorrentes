@@ -168,6 +168,20 @@
       background: #a16207;
     }
 
+    .btn-slate {
+      background: #475569;
+    }
+
+    .btn-slate:hover {
+      background: #334155;
+    }
+
+    .btn-slate:disabled {
+      opacity: 0.25;
+      cursor: default;
+      pointer-events: none;
+    }
+
     .edit-value-input {
       background: #1e293b;
       border: 1px solid #60a5fa;
@@ -511,11 +525,21 @@
         return;
       }
 
-      itemsList.innerHTML = items.map(item => {
+      itemsList.innerHTML = items.map((item, idx) => {
         const paid = isPaid(item.id, selectedYear, selectedMonth);
         const editing = editingId === item.id;
+        const isFirst = idx === 0;
+        const isLast = idx === items.length - 1;
         return `
         <div class="item-row flex items-stretch${paid ? ' item-paid' : ''}">
+          <div class="flex flex-col border-r border-slate-500">
+            <button class="btn-slate text-white px-2 flex-1 flex items-center justify-center transition" onclick="moveItem('${item.id}', -1)" title="Mover para cima" ${isFirst ? 'disabled' : ''}>
+              <i class="fa-solid fa-chevron-up text-xs"></i>
+            </button>
+            <button class="btn-slate text-white px-2 flex-1 flex items-center justify-center transition border-t border-slate-600" onclick="moveItem('${item.id}', 1)" title="Mover para baixo" ${isLast ? 'disabled' : ''}>
+              <i class="fa-solid fa-chevron-down text-xs"></i>
+            </button>
+          </div>
           <div class="flex-1 px-4 py-3 flex items-center gap-3 min-w-0">
             ${paid ? '<i class="fa-solid fa-circle-check text-green-400 flex-shrink-0"></i>' : ''}
             <span class="text-slate-100 font-medium truncate item-label">${escapeHtml(item.account)}</span>
@@ -647,6 +671,21 @@
       renderAll();
     }
 
+    function moveItem(id, direction) {
+      const month = getSelectedMonth();
+      const year = getSelectedYear();
+      const visibleIds = getItemsForMonth(month, year).map(i => i.id);
+      const visibleIdx = visibleIds.indexOf(id);
+      const swapId = visibleIds[visibleIdx + direction];
+      if (!swapId) return;
+
+      const idxA = data.findIndex(i => i.id === id);
+      const idxB = data.findIndex(i => i.id === swapId);
+      [data[idxA], data[idxB]] = [data[idxB], data[idxA]];
+      saveData();
+      renderAll();
+    }
+
     let editingId = null;
 
     function startEdit(id) {
@@ -711,6 +750,7 @@
     }
 
     window.removeItem = removeItem;
+    window.moveItem = moveItem;
     window.togglePaid = togglePaid;
     window.startEdit = startEdit;
     window.saveEdit = saveEdit;
