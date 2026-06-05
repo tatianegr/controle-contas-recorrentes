@@ -271,6 +271,7 @@
               <option>Parcela da televisão</option>
               <option>Seguro do carro</option>
               <option>Anuidade</option>
+              <option>Guardinha</option>
               <option>Outro</option>
             </select>
           </div>
@@ -425,23 +426,31 @@
       });
     }
 
+    const START_YEAR = 2026;
+    const START_MONTH = 3; // Abril
+
     function fillSelectors() {
+      const today = new Date();
+      const todayYear = today.getFullYear();
+      const todayMonth = today.getMonth();
+      const endYear = Math.max(todayYear + 2, 2030);
+
       yearSelect.innerHTML = '';
-      for (let year = 2026; year <= 2030; year++) {
+      for (let year = START_YEAR; year <= endYear; year++) {
         const option = document.createElement('option');
         option.value = String(year);
         option.textContent = String(year);
-        if (year === 2026) option.selected = true;
+        if (year === todayYear) option.selected = true;
         yearSelect.appendChild(option);
       }
 
-      updateMonthOptions(3);
+      updateMonthOptions(todayMonth);
     }
 
     function updateMonthOptions(defaultMonth) {
       const selectedYear = Number(yearSelect.value);
       const currentMonth = defaultMonth !== undefined ? defaultMonth : Number(monthSelect.value);
-      const startMonth = selectedYear === 2026 ? 3 : 0;
+      const startMonth = selectedYear === START_YEAR ? START_MONTH : 0;
       const targetMonth = currentMonth >= startMonth ? currentMonth : startMonth;
 
       monthSelect.innerHTML = '';
@@ -505,7 +514,7 @@
     function getTotalForYear(year) {
       let total = 0;
       for (let month = 0; month < 12; month++) {
-        if (year === 2026 && month < 3) continue;
+        if (year === START_YEAR && month < START_MONTH) continue;
         total += getTotalForMonth(month, year);
       }
       return total;
@@ -590,9 +599,10 @@
 
     function buildHistoryTimeline() {
       const timeline = [];
+      const endYear = Math.max(new Date().getFullYear() + 2, 2030);
 
-      for (let year = 2026; year <= 2030; year++) {
-        const startMonth = year === 2026 ? 3 : 0;
+      for (let year = START_YEAR; year <= endYear; year++) {
+        const startMonth = year === START_YEAR ? START_MONTH : 0;
 
         for (let month = startMonth; month < 12; month++) {
           timeline.push({ year, month });
