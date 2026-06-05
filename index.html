@@ -430,7 +430,7 @@
       const key = paymentKey(itemId, year, month);
       payments[key] = !payments[key];
       savePayments();
-      renderItems();
+      renderAll();
     }
 
     function formatCurrency(value) {
