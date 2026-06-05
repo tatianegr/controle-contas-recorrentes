@@ -307,7 +307,7 @@
     <section class="app-card p-5 md:p-6">
       <h3 class="text-2xl font-bold mb-4">Resumo do Período</h3>
 
-      <div class="space-y-2 text-base">
+      <div class="space-y-2 text-base mb-5">
         <p>
           <span class="font-semibold text-green-400">Total do mês:</span>
           <span id="resumeMonthTotal">R$ 0,00</span>
@@ -318,9 +318,24 @@
         </p>
       </div>
 
-      <div class="mt-5">
-        <p class="font-semibold mb-2">Contas lançadas no mês</p>
-        <ul id="resumeList" class="list-disc pl-5 text-slate-100"></ul>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-green-900/30 border border-green-700/40 rounded-xl p-4">
+          <p class="font-semibold text-green-400 mb-1">
+            <i class="fa-solid fa-circle-check mr-1"></i>Pagas
+            <span id="resumePaidCount" class="text-slate-300 font-normal text-sm ml-1"></span>
+          </p>
+          <p class="text-xl font-bold text-green-300 mb-3" id="resumePaidTotal">R$ 0,00</p>
+          <ul id="resumePaidList" class="text-sm text-slate-300 space-y-1"></ul>
+        </div>
+
+        <div class="bg-red-900/30 border border-red-700/40 rounded-xl p-4">
+          <p class="font-semibold text-red-400 mb-1">
+            <i class="fa-solid fa-clock mr-1"></i>Pendentes
+            <span id="resumePendingCount" class="text-slate-300 font-normal text-sm ml-1"></span>
+          </p>
+          <p class="text-xl font-bold text-red-300 mb-3" id="resumePendingTotal">R$ 0,00</p>
+          <ul id="resumePendingList" class="text-sm text-slate-300 space-y-1"></ul>
+        </div>
       </div>
     </section>
 
@@ -366,7 +381,6 @@
 
     const resumeMonthTotal = document.getElementById('resumeMonthTotal');
     const resumeCount = document.getElementById('resumeCount');
-    const resumeList = document.getElementById('resumeList');
 
     const historyMonthLabel = document.getElementById('historyMonthLabel');
     const historyTitle = document.getElementById('historyTitle');
@@ -578,23 +592,32 @@
       const selectedMonth = getSelectedMonth();
       const selectedYear = getSelectedYear();
 
-      const monthTotal = getTotalForMonth(selectedMonth, selectedYear);
-      const count = getCountForMonth(selectedMonth, selectedYear);
       const items = getItemsForMonth(selectedMonth, selectedYear);
+      const monthTotal = items.reduce((s, i) => s + Number(i.value), 0);
+      const count = items.length;
 
       totalMonthCard.textContent = formatCurrency(monthTotal);
       countCard.textContent = count;
-
       resumeMonthTotal.textContent = formatCurrency(monthTotal);
       resumeCount.textContent = count;
 
-      if (!items.length) {
-        resumeList.innerHTML = '<li>—</li>';
-      } else {
-        resumeList.innerHTML = items.map(item => `
-          <li>${escapeHtml(item.account)} (${labelRecurrence(item.recurrence).toLowerCase()})</li>
-        `).join('');
-      }
+      const paidItems    = items.filter(i =>  isPaid(i.id, selectedYear, selectedMonth));
+      const pendingItems = items.filter(i => !isPaid(i.id, selectedYear, selectedMonth));
+
+      const paidTotal    = paidItems.reduce((s, i) => s + Number(i.value), 0);
+      const pendingTotal = pendingItems.reduce((s, i) => s + Number(i.value), 0);
+
+      document.getElementById('resumePaidTotal').textContent    = formatCurrency(paidTotal);
+      document.getElementById('resumePendingTotal').textContent = formatCurrency(pendingTotal);
+      document.getElementById('resumePaidCount').textContent    = `(${paidItems.length})`;
+      document.getElementById('resumePendingCount').textContent = `(${pendingItems.length})`;
+
+      const toHtml = list => list.length
+        ? list.map(i => `<li class="flex justify-between gap-2"><span>${escapeHtml(i.account)}</span><span class="font-medium">${formatCurrency(i.value)}</span></li>`).join('')
+        : '<li class="text-slate-500">—</li>';
+
+      document.getElementById('resumePaidList').innerHTML    = toHtml(paidItems);
+      document.getElementById('resumePendingList').innerHTML = toHtml(pendingItems);
     }
 
     function buildHistoryTimeline() {
